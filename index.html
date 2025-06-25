@@ -4,184 +4,190 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Darkest Night - Web3 Edition</title>
+    
+    <!-- КРИТИЧЕСКИ ВАЖНЫЕ PRELOADS для быстрой загрузки -->
+    <link rel="preload" href="assets/backgrounds/menu_background.png" as="image">
+    <link rel="preload" href="assets/backgrounds/background.png" as="image">
+    <link rel="preload" href="assets/player/player_right.png" as="image">
+    <link rel="preload" href="assets/buildings/tower.png" as="image">
+    
     <link rel="stylesheet" href="css/styles.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.8.0/ethers.umd.min.js"></script>
 
-    
+    <script src="https://unpkg.com/buffer@6.0.3/index.js"></script>
+    <script src="https://unpkg.com/process@0.11.10/browser.js"></script>
 
-
-<script src="https://unpkg.com/buffer@6.0.3/index.js"></script>
-<script src="https://unpkg.com/process@0.11.10/browser.js"></script>
-
-<script>
-    
-    if (typeof global === 'undefined') {
-        window.global = window;
-        global = window;
-    }
-    
-    
-    if (typeof window.Buffer === 'undefined' && typeof buffer !== 'undefined') {
-        window.Buffer = buffer.Buffer;
-        global.Buffer = buffer.Buffer;
-    }
-    
-    
-    if (typeof window.process === 'undefined') {
-        window.process = global.process = {
-            env: { NODE_ENV: 'production', BROWSER: true },
-            nextTick: function(fn) { setTimeout(fn, 0); },
-            version: 'v18.0.0',
-            versions: { node: '18.0.0' },
-            platform: 'browser',
-            browser: true,
-            argv: [],
-            cwd: function() { return '/'; }
-        };
-    }
-    
-    
-    if (!window.crypto || !window.crypto.getRandomValues) {
-        window.crypto = window.crypto || {};
-        window.crypto.getRandomValues = function(array) {
-            for (let i = 0; i < array.length; i++) {
-                array[i] = Math.floor(Math.random() * 256);
-            }
-            return array;
-        };
-    }
-    global.crypto = window.crypto;
-    
-    console.log('🔧 Crypto polyfills loaded');
-</script>
-
-
-<script type="module">
-    console.log('🔄 Loading REAL Irys modules...');
-    
-    async function loadRealIrysModules() {
-        const methods = [
-            {
-                name: 'ESM.SH',
-                load: async () => {
-                    const [uploader, ethereum] = await Promise.all([
-                        import('https://esm.sh/@irys/web-upload@0.0.11'),
-                        import('https://esm.sh/@irys/web-upload-ethereum@0.0.8')
-                    ]);
-                    return {
-                        WebUploader: uploader.WebUploader || uploader.default,
-                        WebEthereum: ethereum.WebEthereum || ethereum.default
-                    };
-                }
-            },
-            {
-                name: 'JSDelivr',
-                load: async () => {
-                    const [uploader, ethereum] = await Promise.all([
-                        import('https://cdn.jsdelivr.net/npm/@irys/web-upload@0.0.11/+esm'),
-                        import('https://cdn.jsdelivr.net/npm/@irys/web-upload-ethereum@0.0.8/+esm')
-                    ]);
-                    return {
-                        WebUploader: uploader.WebUploader || uploader.default,
-                        WebEthereum: ethereum.WebEthereum || ethereum.default
-                    };
-                }
-            }
-        ];
-        
-        for (const method of methods) {
-            try {
-                console.log(`🔄 Trying ${method.name}...`);
-                const modules = await method.load();
-                
-                if (modules.WebUploader && modules.WebEthereum) {
-                    window.IrysWebUploader = modules.WebUploader;
-                    window.IrysWebEthereum = modules.WebEthereum;
-                    
-                    console.log(`✅ REAL Irys modules loaded via ${method.name}!`);
-                    window.dispatchEvent(new CustomEvent('irysModulesLoaded'));
-                    return true;
-                }
-            } catch (error) {
-                console.log(`❌ ${method.name} failed:`, error.message);
-                continue;
-            }
+    <script>
+        if (typeof global === 'undefined') {
+            window.global = window;
+            global = window;
         }
         
-        throw new Error('All methods failed');
-    }
-    
-    loadRealIrysModules().catch(error => {
-        console.error('🚨 FAILED to load REAL Irys modules:', error.message);
+        if (typeof window.Buffer === 'undefined' && typeof buffer !== 'undefined') {
+            window.Buffer = buffer.Buffer;
+            global.Buffer = buffer.Buffer;
+        }
         
+        if (typeof window.process === 'undefined') {
+            window.process = global.process = {
+                env: { NODE_ENV: 'production', BROWSER: true },
+                nextTick: function(fn) { setTimeout(fn, 0); },
+                version: 'v18.0.0',
+                versions: { node: '18.0.0' },
+                platform: 'browser',
+                browser: true,
+                argv: [],
+                cwd: function() { return '/'; }
+            };
+        }
         
-        setTimeout(() => {
-            const walletStatus = document.getElementById('walletStatus');
-            if (walletStatus) {
-                walletStatus.textContent = '❌Failed to сonnect wallet . Refresh page.';
-                walletStatus.className = 'wallet-status error';
-            }
-        }, 1000);
+        if (!window.crypto || !window.crypto.getRandomValues) {
+            window.crypto = window.crypto || {};
+            window.crypto.getRandomValues = function(array) {
+                for (let i = 0; i < array.length; i++) {
+                    array[i] = Math.floor(Math.random() * 256);
+                }
+                return array;
+            };
+        }
+        global.crypto = window.crypto;
         
-        window.dispatchEvent(new CustomEvent('irysModulesFailed'));
-    });
-</script>
+        console.log('🔧 Crypto polyfills loaded');
+    </script>
 
-<!-- 4. ФУНКЦИЯ ОЖИДАНИЯ -->
-<script>
-    function waitForIrysModules() {
-        return new Promise((resolve, reject) => {
-            console.log('⏳ Waiting for REAL Irys modules...');
+    <script type="module">
+        console.log('🔄 Loading REAL Irys modules...');
+        
+        async function loadRealIrysModules() {
+            const methods = [
+                {
+                    name: 'ESM.SH',
+                    load: async () => {
+                        const [uploader, ethereum] = await Promise.all([
+                            import('https://esm.sh/@irys/web-upload@0.0.11'),
+                            import('https://esm.sh/@irys/web-upload-ethereum@0.0.8')
+                        ]);
+                        return {
+                            WebUploader: uploader.WebUploader || uploader.default,
+                            WebEthereum: ethereum.WebEthereum || ethereum.default
+                        };
+                    }
+                },
+                {
+                    name: 'JSDelivr',
+                    load: async () => {
+                        const [uploader, ethereum] = await Promise.all([
+                            import('https://cdn.jsdelivr.net/npm/@irys/web-upload@0.0.11/+esm'),
+                            import('https://cdn.jsdelivr.net/npm/@irys/web-upload-ethereum@0.0.8/+esm')
+                        ]);
+                        return {
+                            WebUploader: uploader.WebUploader || uploader.default,
+                            WebEthereum: ethereum.WebEthereum || ethereum.default
+                        };
+                    }
+                }
+            ];
             
-            if (typeof window.IrysWebUploader !== 'undefined' && 
-                typeof window.IrysWebEthereum !== 'undefined') {
-                console.log('✅ REAL Irys modules ready');
-                resolve(true);
-                return;
+            for (const method of methods) {
+                try {
+                    console.log(`🔄 Trying ${method.name}...`);
+                    const modules = await method.load();
+                    
+                    if (modules.WebUploader && modules.WebEthereum) {
+                        window.IrysWebUploader = modules.WebUploader;
+                        window.IrysWebEthereum = modules.WebEthereum;
+                        
+                        console.log(`✅ REAL Irys modules loaded via ${method.name}!`);
+                        window.dispatchEvent(new CustomEvent('irysModulesLoaded'));
+                        return true;
+                    }
+                } catch (error) {
+                    console.log(`❌ ${method.name} failed:`, error.message);
+                    continue;
+                }
             }
             
-            let resolved = false;
-            
-            window.addEventListener('irysModulesLoaded', () => {
-                if (!resolved) {
-                    resolved = true;
-                    console.log('🎉 REAL Irys modules loaded successfully!');
-                    resolve(true);
-                }
-            }, { once: true });
-            
-            window.addEventListener('irysModulesFailed', () => {
-                if (!resolved) {
-                    resolved = true;
-                    console.log('💥 REAL Irys modules failed');
-                    reject(new Error('Real Irys modules failed to load'));
-                }
-            }, { once: true });
+            throw new Error('All methods failed');
+        }
+        
+        loadRealIrysModules().catch(error => {
+            console.error('🚨 FAILED to load REAL Irys modules:', error.message);
             
             setTimeout(() => {
-                if (!resolved) {
-                    resolved = true;
-                    console.log('⏰ Timeout waiting for Irys modules');
-                    reject(new Error('Timeout loading Irys modules'));
+                const walletStatus = document.getElementById('walletStatus');
+                if (walletStatus) {
+                    walletStatus.textContent = '❌Failed to connect wallet. Refresh page.';
+                    walletStatus.className = 'wallet-status error';
                 }
-            }, 15000);
+            }, 1000);
+            
+            window.dispatchEvent(new CustomEvent('irysModulesFailed'));
         });
-    }
-    
-    window.waitForIrysModules = waitForIrysModules;
-    console.log('🎯 REAL Irys integration ready');
-</script>
+    </script>
+
+    <script>
+        function waitForIrysModules() {
+            return new Promise((resolve, reject) => {
+                console.log('⏳ Waiting for REAL Irys modules...');
+                
+                if (typeof window.IrysWebUploader !== 'undefined' && 
+                    typeof window.IrysWebEthereum !== 'undefined') {
+                    console.log('✅ REAL Irys modules ready');
+                    resolve(true);
+                    return;
+                }
+                
+                let resolved = false;
+                
+                window.addEventListener('irysModulesLoaded', () => {
+                    if (!resolved) {
+                        resolved = true;
+                        console.log('🎉 REAL Irys modules loaded successfully!');
+                        resolve(true);
+                    }
+                }, { once: true });
+                
+                window.addEventListener('irysModulesFailed', () => {
+                    if (!resolved) {
+                        resolved = true;
+                        console.log('💥 REAL Irys modules failed');
+                        reject(new Error('Real Irys modules failed to load'));
+                    }
+                }, { once: true });
+                
+                setTimeout(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        console.log('⏰ Timeout waiting for Irys modules');
+                        reject(new Error('Timeout loading Irys modules'));
+                    }
+                }, 15000);
+            });
+        }
+        
+        window.waitForIrysModules = waitForIrysModules;
+        console.log('🎯 REAL Irys integration ready');
+    </script>
 
 </head>
 <body>
+    <!-- LOADING INDICATOR -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <h1 class="loading-title">Darkest Night</h1>
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading game assets...</p>
+        </div>
+    </div>
+
     <!-- Web3 Notification -->
     <div id="web3-notification" class="web3-notification"></div>
 
     <!-- Game Title Section -->
     <h1 class="game-title">Darkest Night</h1>
     
-    <!-- 1. PAYMENT SECTION (вверху, остается неизменной) -->
+    <!-- PAYMENT SECTION -->
     <div class="wallet-section" id="walletSection">
         <div class="wallet-header">
             <div class="wallet-status info" id="walletStatus">
@@ -224,13 +230,13 @@
         </div>
     </div>
 
-    <!-- 2. GAME SECTION -->
+    <!-- GAME SECTION -->
     <div class="game-section">
         <!-- Game Container -->
         <div class="game-container">
             <canvas id="gameCanvas" width="900" height="500"></canvas>
             
-            <!-- Game Over Screen (УБРАНА КРАСНАЯ РАМКА blockchainStatus) -->
+            <!-- Game Over Screen -->
             <div class="game-over-screen" id="gameOverScreen">
                 <div class="game-over-title">TOWER DESTROYED</div>
                 <div class="final-stats">
@@ -286,20 +292,19 @@
         </div>
     </div>
 
-    
     <div class="developer-credit">
         by WestSide
     </div>
 
-    
+    <!-- SCRIPTS -->
     <script src="js/config.js"></script>
     <script src="js/classes.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/game.js"></script>
     
+    <!-- OPTIMIZED WEB3 INTEGRATION -->
     <script>
         console.log('🔗 Initializing Irys Network Web3 integration...');
-        
         
         const IRYS_NETWORK_CONFIG = {
             chainId: '0x4f6', 
@@ -313,9 +318,7 @@
             blockExplorerUrls: ['https://storage-explorer.irys.xyz']
         };
 
-        
         const ENTRY_FEE_COLLECTOR = "0x92D696BFcA04E6241F2aaC813d0D14F8cf6c8D2b";
-        
         
         let web3GameState = {
             connected: false,
@@ -328,11 +331,29 @@
             signer: null
         };
 
-        
+        // LOADING SCREEN MANAGEMENT
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+        }
+
+        function updateLoadingText(text) {
+            const loadingText = document.querySelector('.loading-text');
+            if (loadingText) {
+                loadingText.textContent = text;
+            }
+        }
+
+        // WEB3 FUNCTIONS 
         async function initializeIrysUploader() {
             try {
                 console.log('🔄 Initializing Irys uploader...');
-                
+                updateLoadingText('Initializing Irys uploader...');
                 
                 if (typeof window.IrysWebUploader === 'undefined' || typeof window.IrysWebEthereum === 'undefined') {
                     throw new Error('Irys modules not loaded from CDN');
@@ -342,12 +363,10 @@
                     throw new Error('Web3 provider not available');
                 }
                 
-                
                 const irys = await window.IrysWebUploader(window.IrysWebEthereum)
                     .withProvider(web3GameState.provider);
                 
                 console.log('✅ Irys uploader initialized successfully');
-                
                 
                 try {
                     const balance = await irys.getBalance();
@@ -363,7 +382,6 @@
                 throw error;
             }
         }
-        
         
         async function getCurrentNetwork() {
             try {
@@ -382,7 +400,6 @@
                 return { chainId: null, isIrysNetwork: false };
             }
         }
-        
         
         async function addIrysNetwork() {
             try {
@@ -408,7 +425,6 @@
                 return false;
             }
         }
-        
         
         async function switchToIrysNetwork() {
             try {
@@ -439,7 +455,6 @@
             }
         }
         
-        
         function checkMetaMaskAvailable() {
             return new Promise((resolve) => {
                 if (typeof window.ethereum !== 'undefined') {
@@ -459,7 +474,6 @@
             });
         }
 
-        
         async function checkBalance() {
             try {
                 const balance = await web3GameState.provider.getBalance(web3GameState.userAddress);
@@ -488,13 +502,11 @@
                 
                 updateConnectButton('Checking MetaMask...', true);
                 
-                
                 const isMetaMaskAvailable = await checkMetaMaskAvailable();
                 if (!isMetaMaskAvailable) {
                     throw new Error('MetaMask not found! Please install MetaMask extension and refresh the page.');
                 }
 
-                
                 if (typeof ethers === 'undefined') {
                     console.error('❌ Ethers.js not loaded!');
                     throw new Error('Ethers.js library not loaded. Please check your internet connection and refresh.');
@@ -503,8 +515,7 @@
                 updateConnectButton('Connecting...', true);
                 updateWalletStatus('Requesting wallet connection...', 'info');
                 
-                console.log('equesting MetaMask connection...');
-                
+                console.log('Requesting MetaMask connection...');
                 
                 const accounts = await window.ethereum.request({
                     method: 'eth_requestAccounts',
@@ -516,7 +527,6 @@
                 if (!accounts || accounts.length === 0) {
                     throw new Error('No accounts returned. Please unlock MetaMask and try again.');
                 }
-                
                 
                 updateConnectButton('Checking network...', true);
                 const networkInfo = await getCurrentNetwork();
@@ -531,14 +541,12 @@
                         throw new Error('Failed to switch to Irys Network. Please add Irys Network manually.');
                     }
                     
-                    
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     const newNetworkInfo = await getCurrentNetwork();
                     if (!newNetworkInfo.isIrysNetwork) {
                         throw new Error('Still not on Irys Network after switch attempt.');
                     }
                 }
-                
                 
                 updateConnectButton('Getting balance...', true);
                 
@@ -547,7 +555,6 @@
                     web3GameState.signer = await web3GameState.provider.getSigner();
                     const balance = await web3GameState.provider.getBalance(accounts[0]);
                     const balanceEther = ethers.formatEther(balance);
-                    
                     
                     web3GameState.connected = true;
                     web3GameState.userAddress = accounts[0];
@@ -563,7 +570,6 @@
                     updateWalletStatus('Connected to Irys Network successfully', 'success');
                     updateStartButton();
 
-                    
                     console.log('🔄 Testing Irys uploader initialization...');
                     try {
                         const testUploader = await initializeIrysUploader();
@@ -595,7 +601,6 @@
                 
                 let errorMessage = error.message;
                 
-                
                 if (error.code === 4001) {
                     errorMessage = 'Connection rejected by user';
                 } else if (error.code === -32002) {
@@ -608,13 +613,11 @@
                 updateConnectButton('🦊 Connect MetaMask', false);
                 showNotification(`Connection failed: ${errorMessage}`, 'error');
                 
-                
                 if (errorMessage.includes('network') || errorMessage.includes('Network')) {
                     document.getElementById('addNetworkBtn').style.display = 'inline-block';
                 }
             }
         }
-        
         
         async function addNetworkManually() {
             const success = await addIrysNetwork();
@@ -623,7 +626,6 @@
                 showNotification('Now try connecting again!', 'info');
             }
         }
-        
         
         async function payGameEntry() {
             try {
@@ -635,7 +637,6 @@
                     throw new Error('Please switch to Irys Network first');
                 }
 
-                // Проверка баланса 
                 updatePayEntryButton('Checking Balance...', true);
                 await checkBalance();
 
@@ -645,9 +646,7 @@
                 console.log('Processing REAL entry fee for:', web3GameState.userAddress);
                 console.log('Network: Irys Network (Chain ID: 1270)');
 
-                
                 const entryFeeInWei = ethers.parseEther("0.001"); 
-                
                 
                 updatePayEntryButton('Estimating Gas...', true);
                 const gasEstimate = await web3GameState.provider.estimateGas({
@@ -668,24 +667,21 @@
                 
                 updatePayEntryButton('Processing Payment...', true);
                 
-                
                 const tx = await web3GameState.signer.sendTransaction(txRequest);
                 console.log('⏳ Transaction sent, waiting for confirmation:', tx.hash);
                 
                 showNotification(`Transaction sent! Hash: ${tx.hash.substring(0, 10)}...`, 'info');
                 updatePayEntryButton('Processing Payment...', true);
 
-                
                 const receipt = await tx.wait();
                 console.log('✅ Transaction confirmed:', receipt);
 
                 if (receipt.status === 1) {
-                    
                     web3GameState.entryPaid = true;
                     updateWalletUI();
                     updateStartButton();
                     
-                    showNotification(`Entry fee paid Tx: ${receipt.hash.substring(0, 10)}...`, 'success');
+                    showNotification(`Entry fee paid! Tx: ${receipt.hash.substring(0, 10)}...`, 'success');
                     updatePayEntryButton('Success', true);
                     
                     console.log('Entry fee payment successful on Irys Network');
@@ -699,7 +695,6 @@
                 
                 let errorMessage = error.message;
                 
-                // Обработка ошибок
                 if (error.code === 4001) {
                     errorMessage = 'Transaction rejected by user';
                 } else if (error.code === 'INSUFFICIENT_FUNDS') {
@@ -715,7 +710,6 @@
                 showNotification(`Payment failed: ${errorMessage}`, 'error');
                 updatePayEntryButton('PLAY NOW', false);
                 
-                // Сбрасываем состояние при ошибке
                 web3GameState.entryPaid = false;
                 updateWalletUI();
                 updateStartButton();
@@ -831,7 +825,7 @@
             }
         }
 
-        // EVENT LISTENERS
+        // INITIALIZATION WITH LOADING SCREEN
         document.addEventListener('DOMContentLoaded', () => {
             const connectButton = document.getElementById('connectWallet');
             const payEntryButton = document.getElementById('payEntry');
@@ -849,13 +843,35 @@
                 addNetworkButton.addEventListener('click', addNetworkManually);
             }
 
-            
+            // Global Web3 Game Interface
             window.web3Game = {
                 isWeb3Ready: () => web3GameState.connected && web3GameState.entryPaid && web3GameState.onCorrectNetwork,
                 getPlayerAddress: () => web3GameState.userAddress,
                 isEntryPaid: () => web3GameState.entryPaid,
                 isOnCorrectNetwork: () => web3GameState.onCorrectNetwork
             };
+
+            // Initialize loading sequence
+            updateLoadingText('Initializing game...');
+            
+            // Simulate asset loading
+            setTimeout(() => {
+                updateLoadingText('Loading assets...');
+            }, 500);
+            
+            setTimeout(() => {
+                updateLoadingText('Preparing Web3 integration...');
+            }, 1000);
+            
+            setTimeout(() => {
+                updateLoadingText('Almost ready...');
+            }, 1500);
+            
+            // Hide loading screen after assets are ready
+            setTimeout(() => {
+                hideLoadingScreen();
+                console.log('✅ Game ready - Web3 integration initialized');
+            }, 2000);
 
             console.log('✅ Web3 integration initialized');
         });
