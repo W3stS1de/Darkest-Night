@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@irys/web-upload": "^0.0.15",
+    "@irys/web-upload-ethereum": "^0.0.16"
+  }
+}
