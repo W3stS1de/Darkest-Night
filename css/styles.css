@@ -1,0 +1,642 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-image: url('../assets/backgrounds/menu_background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    color: white;
+    position: relative;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: -1;
+}
+
+.game-title {
+    color: #00ffcc;
+    font-size: 3.5em;
+    text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc;
+    margin-bottom: 10px;
+    animation: glow 2s ease-in-out infinite alternate;
+    text-align: center;
+    z-index: 101;
+}
+
+@keyframes glow {
+    from { text-shadow: 0 0 20px #00ffcc, 0 0 30px #00ffcc; }
+    to { text-shadow: 0 0 30px #00ffcc, 0 0 50px #00ffcc, 0 0 70px #00ffcc; }
+}
+
+.game-subtitle {
+    color: #ffd700;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    text-align: center;
+    z-index: 101;
+}
+
+
+
+.wallet-section {
+    background: rgba(0, 20, 20, 0.9);
+    border: 2px solid #00ffcc;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
+    max-width: 600px;
+    width: 100%;
+    backdrop-filter: blur(10px);
+}
+
+.wallet-header h2 {
+    color: #00ffcc;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+    text-shadow: 0 0 10px #00ffcc;
+}
+
+.wallet-status {
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.wallet-status.info {
+    background: rgba(0, 123, 255, 0.2);
+    border: 1px solid rgba(0, 123, 255, 0.5);
+    color: #87ceeb;
+}
+
+.wallet-status.success {
+    background: rgba(0, 184, 148, 0.2);
+    border: 1px solid rgba(0, 184, 148, 0.5);
+    color: #00b894;
+}
+
+.wallet-status.error {
+    background: rgba(255, 107, 107, 0.2);
+    border: 1px solid rgba(255, 107, 107, 0.5);
+    color: #ff6b6b;
+}
+
+.wallet-status.warning {
+    background: rgba(255, 193, 7, 0.2);
+    border: 1px solid rgba(255, 193, 7, 0.5);
+    color: #ffc107;
+}
+
+.connect-wallet-btn {
+    background: linear-gradient(45deg, #00ffcc, #00aaaa, #008888);
+    background-size: 300% 300%;
+    color: #0a0a0f;
+    border: 2px solid #00ffcc;
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 12px;
+    margin: 0 auto;
+    display: block;
+    transition: all 0.4s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 
+        0 0 20px rgba(0, 255, 204, 0.6),
+        0 0 40px rgba(0, 255, 204, 0.4),
+        inset 0 0 20px rgba(0, 255, 204, 0.1);
+    animation: neonPulse 2s infinite alternate;
+    position: relative;
+    overflow: hidden;
+}
+
+.connect-wallet-btn:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+}
+
+.connect-wallet-btn:hover:before {
+    left: 100%;
+}
+
+.connect-wallet-btn:hover {
+    background: linear-gradient(45deg, #00aaaa, #008888, #006666);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 0 30px rgba(0, 255, 204, 0.8),
+        0 0 60px rgba(0, 255, 204, 0.6),
+        0 15px 35px rgba(0, 255, 204, 0.4);
+}
+
+@keyframes neonPulse {
+    from { 
+        box-shadow: 
+            0 0 20px rgba(0, 255, 204, 0.6),
+            0 0 40px rgba(0, 255, 204, 0.4),
+            inset 0 0 20px rgba(0, 255, 204, 0.1);
+    }
+    to { 
+        box-shadow: 
+            0 0 25px rgba(0, 255, 204, 0.8),
+            0 0 50px rgba(0, 255, 204, 0.6),
+            inset 0 0 25px rgba(0, 255, 204, 0.2);
+    }
+}
+
+.wallet-info {
+    margin-top: 20px;
+}
+
+.wallet-details {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.wallet-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px 0;
+}
+
+.wallet-item:last-child {
+    margin-bottom: 0;
+}
+
+.wallet-item .label {
+    color: #cccccc;
+    font-size: 14px;
+}
+
+.wallet-item .value {
+    color: #00ffcc;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 0 5px #00ffcc;
+}
+
+.wallet-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.fund-btn, .pay-entry-btn {
+    background: linear-gradient(45deg, #00ffcc, #00aaaa);
+    color: #0a0a0f;
+    border: 2px solid #00ffcc;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
+}
+
+.fund-btn:hover, .pay-entry-btn:hover {
+    background: linear-gradient(45deg, #00aaaa, #008888);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 255, 204, 0.6);
+}
+
+.pay-entry-btn:disabled {
+    background: #666;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    border-color: #666;
+}
+
+
+
+.game-container {
+    position: relative;
+    border: 3px solid #00ffcc;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
+    margin-bottom: 15px;
+}
+
+#gameCanvas {
+    display: block;
+    background: #0a0a0f;
+}
+
+.ui-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px 20px;
+    border-top: 2px solid #00ffcc;
+    margin-top: 10px;
+    border-radius: 8px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    margin: 0 10px;
+    min-width: 80px;
+}
+
+.stat-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #00ffcc;
+    text-shadow: 0 0 10px #00ffcc;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    opacity: 0.8;
+    margin-top: 5px;
+    text-align: center;
+}
+
+
+
+.start-btn {
+    background: linear-gradient(45deg, #00ffcc, #00aaaa, #008888);
+    background-size: 300% 300%;
+    color: #0a0a0f;
+    border: 2px solid #00ffcc;
+    padding: 20px 50px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 15px;
+    margin: 20px;
+    transition: all 0.4s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 
+        0 0 20px rgba(0, 255, 204, 0.6),
+        0 0 40px rgba(0, 255, 204, 0.4),
+        inset 0 0 20px rgba(0, 255, 204, 0.1);
+    animation: neonPulse 2s infinite alternate;
+    position: relative;
+    overflow: hidden;
+    z-index: 102;
+}
+
+.start-btn.disabled {
+    background: linear-gradient(45deg, #666, #555, #444);
+    color: #999;
+    cursor: not-allowed;
+    animation: none;
+    box-shadow: none;
+    border-color: #666;
+}
+
+.start-btn.enabled:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+}
+
+.start-btn.enabled:hover:before {
+    left: 100%;
+}
+
+.start-btn.enabled:hover {
+    background: linear-gradient(45deg, #00aaaa, #008888, #006666);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 0 30px rgba(0, 255, 204, 0.8),
+        0 0 60px rgba(0, 255, 204, 0.6),
+        0 15px 35px rgba(0, 255, 204, 0.4);
+}
+
+.game-btn {
+    background: linear-gradient(45deg, #00ffcc, #00aaaa);
+    color: #1a1a2e;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+    margin: 10px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
+}
+
+.game-btn:hover {
+    background: linear-gradient(45deg, #00aaaa, #008888);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 255, 204, 0.6);
+}
+
+.restart-btn {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a5a, #dd4444);
+    color: white;
+    border: 2px solid #ff6b6b;
+    padding: 18px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 12px;
+    margin: 20px auto;
+    transition: all 0.4s ease;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 
+        0 0 20px rgba(255, 107, 107, 0.6),
+        0 0 40px rgba(255, 107, 107, 0.4);
+    animation: redNeonPulse 2s infinite alternate;
+    position: relative;
+    display: block;
+    z-index: 102;
+}
+
+.restart-btn:hover {
+    background: linear-gradient(45deg, #ee5a5a, #dd4444, #cc3333);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 0 30px rgba(255, 107, 107, 0.8),
+        0 0 60px rgba(255, 107, 107, 0.6);
+}
+
+@keyframes redNeonPulse {
+    from { 
+        box-shadow: 
+            0 0 20px rgba(255, 107, 107, 0.6),
+            0 0 40px rgba(255, 107, 107, 0.4);
+    }
+    to { 
+        box-shadow: 
+            0 0 25px rgba(255, 107, 107, 0.8),
+            0 0 50px rgba(255, 107, 107, 0.6);
+    }
+}
+
+.controls {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.control-item {
+    display: inline-block;
+    margin: 0 10px;
+    color: #ccc;
+    font-size: 14px;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    z-index: 102;
+}
+
+.menu-buttons {
+    display: flex;
+    gap: 20px;
+    z-index: 102;
+}
+
+
+
+.game-over-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.game-over-title {
+    font-size: 3em;
+    color: #ff6b6b;
+    text-shadow: 0 0 20px #ff6b6b;
+    margin-bottom: 20px;
+}
+
+.final-stats {
+    background: rgba(0, 255, 204, 0.1);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    border: 1px solid rgba(0, 255, 204, 0.3);
+    min-width: 300px;
+}
+
+.final-stats > div {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+.final-score {
+    font-size: 1.4em !important;
+    color: #ffd700;
+    font-weight: bold;
+    margin: 15px 0 !important;
+    text-shadow: 0 0 10px #ffd700;
+}
+
+
+
+.web3-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-weight: bold;
+    z-index: 10000;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    max-width: 350px;
+    word-wrap: break-word;
+}
+
+.web3-notification.show {
+    transform: translateX(0);
+}
+
+.web3-notification.success {
+    background: rgba(0, 184, 148, 0.9);
+    border: 2px solid #00b894;
+    color: white;
+}
+
+.web3-notification.error {
+    background: rgba(255, 107, 107, 0.9);
+    border: 2px solid #ff6b6b;
+    color: white;
+}
+
+.web3-notification.info {
+    background: rgba(0, 123, 255, 0.9);
+    border: 2px solid #007bff;
+    color: white;
+}
+
+
+
+.developer-credit {
+    position: fixed;
+    bottom: 25px;
+    right: 30px;
+    color: #00ffcc;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: 'Arial', sans-serif;
+    letter-spacing: 2px;
+    z-index: 103;
+    background: rgba(0, 20, 20, 0.8);
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: 2px solid #00ffcc;
+    text-shadow: 0 0 10px #00ffcc;
+    box-shadow: 0 0 12px rgba(0, 255, 204, 0.5);
+}
+
+.developer-credit:hover {
+    text-shadow: 0 0 15px #00ffcc;
+    box-shadow: 0 0 18px rgba(0, 255, 204, 0.7);
+}
+
+
+@media (max-width: 950px) {
+    body {
+        padding: 10px;
+    }
+
+    #gameCanvas {
+        width: 90vw;
+        height: auto;
+    }
+    
+    .game-title {
+        font-size: 2.5em;
+    }
+    
+    .start-btn {
+        font-size: 20px;
+        padding: 15px 35px;
+    }
+    
+    .ui-panel {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+    
+    .stat-item {
+        margin: 5px;
+        min-width: 70px;
+    }
+    
+    .wallet-section {
+        padding: 20px;
+    }
+    
+    .wallet-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .developer-credit {
+        bottom: 10px;
+        right: 10px;
+        font-size: 12px;
+        padding: 8px 15px;
+    }
+    
+    .web3-notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        transform: translateY(-200px);
+        max-width: none;
+    }
+    
+    .web3-notification.show {
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 600px) {
+    .game-title {
+        font-size: 2em;
+    }
+    
+    .game-subtitle {
+        font-size: 1em;
+    }
+    
+    .start-btn {
+        font-size: 18px;
+        padding: 12px 25px;
+    }
+    
+    .wallet-section {
+        padding: 15px;
+    }
+    
+    .stat-value {
+        font-size: 1.2em;
+    }
+    
+    .stat-label {
+        font-size: 0.8em;
+    }
+}
