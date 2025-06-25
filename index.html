@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Darkest Night - Web3 Edition</title>
     
-    <!-- КРИТИЧЕСКИ ВАЖНЫЕ PRELOADS для быстрой загрузки -->
+    
     <link rel="preload" href="assets/backgrounds/menu_background.png" as="image">
     <link rel="preload" href="assets/backgrounds/background.png" as="image">
     <link rel="preload" href="assets/player/player_right.png" as="image">
@@ -112,7 +112,7 @@
         }
         
         loadRealIrysModules().catch(error => {
-            console.error('🚨 FAILED to load REAL Irys modules:', error.message);
+            console.error('FAILED to load REAL Irys modules:', error.message);
             
             setTimeout(() => {
                 const walletStatus = document.getElementById('walletStatus');
@@ -143,7 +143,7 @@
                 window.addEventListener('irysModulesLoaded', () => {
                     if (!resolved) {
                         resolved = true;
-                        console.log('🎉 REAL Irys modules loaded successfully!');
+                        console.log(' REAL Irys modules loaded successfully!');
                         resolve(true);
                     }
                 }, { once: true });
@@ -151,7 +151,7 @@
                 window.addEventListener('irysModulesFailed', () => {
                     if (!resolved) {
                         resolved = true;
-                        console.log('💥 REAL Irys modules failed');
+                        console.log(' REAL Irys modules failed');
                         reject(new Error('Real Irys modules failed to load'));
                     }
                 }, { once: true });
@@ -159,7 +159,7 @@
                 setTimeout(() => {
                     if (!resolved) {
                         resolved = true;
-                        console.log('⏰ Timeout waiting for Irys modules');
+                        console.log(' Timeout waiting for Irys modules');
                         reject(new Error('Timeout loading Irys modules'));
                     }
                 }, 15000);
@@ -167,7 +167,7 @@
         }
         
         window.waitForIrysModules = waitForIrysModules;
-        console.log('🎯 REAL Irys integration ready');
+        console.log(' REAL Irys integration ready');
     </script>
 
 </head>
@@ -349,7 +349,7 @@
             }
         }
 
-        // WEB3 FUNCTIONS 
+        // WEB3 FUNCTIONS (same as before but with loading updates)
         async function initializeIrysUploader() {
             try {
                 console.log('🔄 Initializing Irys uploader...');
@@ -370,9 +370,9 @@
                 
                 try {
                     const balance = await irys.getBalance();
-                    console.log('💰 Irys balance check successful:', balance);
+                    console.log(' Irys balance check successful:', balance);
                 } catch (balanceError) {
-                    console.log('⚠️ Balance check failed (normal for new wallets):', balanceError.message);
+                    console.log('⚠Balance check failed (normal for new wallets):', balanceError.message);
                 }
                 
                 return irys;
@@ -403,7 +403,7 @@
         
         async function addIrysNetwork() {
             try {
-                console.log('⚡ Adding Irys Network to MetaMask...');
+                console.log('Adding Irys Network to MetaMask...');
                 
                 await window.ethereum.request({
                     method: 'wallet_addEthereumChain',
@@ -479,7 +479,7 @@
                 const balance = await web3GameState.provider.getBalance(web3GameState.userAddress);
                 const balanceInEth = ethers.formatEther(balance);
                 
-                console.log('💰 Current balance:', balanceInEth, 'IRYS');
+                console.log('Current balance:', balanceInEth, 'IRYS');
                 
                 const entryFee = ethers.parseEther("0.001");
                 const estimatedGas = ethers.parseEther("0.0001"); 
@@ -561,10 +561,10 @@
                     web3GameState.balance = balance.toString();
                     web3GameState.onCorrectNetwork = true;
                     
-                    console.log('✅ Connection successful!');
-                    console.log('👤 Address:', accounts[0]);
-                    console.log('💰 Balance:', balanceEther, 'IRYS');
-                    console.log('🌐 Network: Irys Network');
+                    console.log(' Connection successful!');
+                    console.log(' Address:', accounts[0]);
+                    console.log(' Balance:', balanceEther, 'IRYS');
+                    console.log(' Network: Irys Network');
                     
                     updateWalletUI();
                     updateWalletStatus('Connected to Irys Network successfully', 'success');
@@ -573,11 +573,11 @@
                     console.log('🔄 Testing Irys uploader initialization...');
                     try {
                         const testUploader = await initializeIrysUploader();
-                        console.log('✅ Irys uploader test successful!');
+                        console.log(' Irys uploader test successful!');
                         
                     } catch (uploaderError) {
                         console.error('❌ Irys uploader test failed:', uploaderError);
-                        console.log('⚠️ Will use simulation mode for score submission');
+                        console.log('Will use simulation mode for score submission');
                         showNotification('Irys uploader test failed - using simulation', 'warning');
                     }
 
@@ -610,7 +610,7 @@
                 }
                 
                 updateWalletStatus(`Connection failed: ${errorMessage}`, 'error');
-                updateConnectButton('🦊 Connect MetaMask', false);
+                updateConnectButton('Connect MetaMask', false);
                 showNotification(`Connection failed: ${errorMessage}`, 'error');
                 
                 if (errorMessage.includes('network') || errorMessage.includes('Network')) {
@@ -852,20 +852,7 @@
             };
 
             // Initialize loading sequence
-            updateLoadingText('Initializing game...');
-            
-            // Simulate asset loading
-            setTimeout(() => {
-                updateLoadingText('Loading assets...');
-            }, 500);
-            
-            setTimeout(() => {
-                updateLoadingText('Preparing Web3 integration...');
-            }, 1000);
-            
-            setTimeout(() => {
-                updateLoadingText('Almost ready...');
-            }, 1500);
+            updateLoadingText('Loading...');
             
             // Hide loading screen after assets are ready
             setTimeout(() => {
