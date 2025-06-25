@@ -1,16 +1,14 @@
-// OPTIMIZED UTILS.JS FOR DARKEST NIGHT
-
 // Drawing utility functions
 function drawBackground() {
-    // Проверяем, загружен ли фон для canvas
+    
     if (IMAGES.background && IMAGES.background.complete && IMAGES.background.naturalHeight !== 0) {
         ctx.drawImage(IMAGES.background, 0, 0, canvas.width, canvas.height);
         
-        // Легкое затемнение
+        // затемнение
         ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     } else {
-        // МГНОВЕННЫЙ fallback (пока загружается canvas фон)
+        
         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
         gradient.addColorStop(0, '#2c3e50'); 
         gradient.addColorStop(0.6, '#34495e'); 
@@ -38,7 +36,7 @@ function drawBackground() {
         ctx.fillRect(i + 20, stoneY, stoneSize, stoneSize * 0.6);
     }
     
-    // Ground line highlight
+    // Ground line 
     ctx.strokeStyle = '#2d1810'; 
     ctx.lineWidth = 2;
     ctx.beginPath();
