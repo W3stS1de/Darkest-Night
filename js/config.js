@@ -8,7 +8,8 @@ const CONFIG = {
     player: {
         x: 720,       
         y: 50,       
-        height: 120,
+        width: 90,        
+        height: 120,      
         shootCooldown: 25,
         facing: 'right'
     },
@@ -291,7 +292,7 @@ const AUDIO = {
     musicPaused: false 
 };
 
-// WEB3 
+// WEB3 CONSTANTS
 const WEB3_CONSTANTS = {
     IRYS_NETWORK: {
         CHAIN_ID: 1270,
