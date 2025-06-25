@@ -1,14 +1,14 @@
 // Drawing utility functions
 function drawBackground() {
-    
+    // Проверяем, загружен ли фон для canvas
     if (IMAGES.background && IMAGES.background.complete && IMAGES.background.naturalHeight !== 0) {
         ctx.drawImage(IMAGES.background, 0, 0, canvas.width, canvas.height);
         
-        // затемнение
+        // Легкое затемнение
         ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     } else {
-        
+        // МГНОВЕННЫЙ fallback (пока загружается canvas фон)
         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
         gradient.addColorStop(0, '#2c3e50'); 
         gradient.addColorStop(0.6, '#34495e'); 
@@ -36,7 +36,7 @@ function drawBackground() {
         ctx.fillRect(i + 20, stoneY, stoneSize, stoneSize * 0.6);
     }
     
-    // Ground line 
+    // Ground line highlight
     ctx.strokeStyle = '#2d1810'; 
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -186,133 +186,57 @@ function drawDarkFantasyGroundBorder() {
     }
 }
 
-// ОПТИМИЗИРОВАННАЯ СИСТЕМА ЗАГРУЗКИ АССЕТОВ
-let assetsLoaded = 0;
-let totalAssets = 0;
-
-function updateLoadingProgress() {
-    const loadingText = document.querySelector('.loading-text');
-    if (loadingText) {
-        loadingText.textContent = 'Loading...';
-    }
-    
-    // Скрываем экран загрузки когда все готово
-    if (assetsLoaded >= totalAssets && totalAssets > 0) {
-        setTimeout(() => {
-            const loadingScreen = document.getElementById('loading-screen');
-            if (loadingScreen) {
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                }, 500);
-            }
-        }, 500);
-    }
-}
-
+// ОПТИМИЗИРОВАННАЯ СИСТЕМА ЗАГРУЗКИ АССЕТОВ (из работающего кода)
 async function loadAllAssets() {
-    console.log('🔄 Starting optimized asset loading...');
+    console.log('🔄 Starting background asset loading...');
     
     try {
-        // Подсчитываем общее количество ассетов
-        totalAssets = 3; // background, player.right, tower
-        assetsLoaded = 0;
+        // Фоновая загрузка 
+        loadBackgroundSilently();
+        loadImageSilently(ASSETS.player.right, IMAGES.player, 'right');
+        loadImageSilently(ASSETS.player.left, IMAGES.player, 'left');
+        loadImageSilently(ASSETS.tower, IMAGES, 'tower');
         
-        // Критически важные ассеты (приоритет)
-        const priorityAssets = [
-            { path: ASSETS.background, target: IMAGES, prop: 'background' },
-            { path: ASSETS.player.right, target: IMAGES.player, prop: 'right' },
-            { path: ASSETS.tower, target: IMAGES, prop: 'tower' }
-        ];
-        
-        // Загружаем приоритетные ассеты
-        const priorityPromises = priorityAssets.map(asset => 
-            loadImageWithProgress(asset.path, asset.target, asset.prop)
-        );
-        
-        await Promise.all(priorityPromises);
-        
-        // Фоновая загрузка остальных ассетов (не блокирует игру)
-        loadRemainingAssetsInBackground();
+        // enemy images
+        for (const [enemyType, states] of Object.entries(ASSETS.enemies)) {
+            IMAGES.enemies[enemyType] = {};
+            
+            if (enemyType === 'tank' || enemyType === 'fast') {
+                for (const [state, pathData] of Object.entries(states)) {
+                    if (Array.isArray(pathData)) {
+                        IMAGES.enemies[enemyType][state] = [];
+                        for (let i = 0; i < pathData.length; i++) {
+                            const path = pathData[i];
+                            const img = new Image();
+                            img.onload = function() {
+                                IMAGES.enemies[enemyType][state][i] = img;
+                                console.log(`✅ Loaded ${enemyType} ${state} frame ${i}`);
+                            };
+                            img.onerror = function() {
+                                console.log(`❌ Failed to load ${enemyType} ${state} frame ${i}`);
+                            };
+                            img.src = path;
+                        }
+                    } else {
+                        loadImageSilently(pathData, IMAGES.enemies[enemyType], state);
+                    }
+                }
+            } else {
+                for (const [state, path] of Object.entries(states)) {
+                    loadImageSilently(path, IMAGES.enemies[enemyType], state);
+                }
+            }
+        }
         
         // Инициализация звука
         initSoundEffects();
         
         IMAGES.loaded = true;
-        console.log('✅ Priority assets loaded successfully!');
+        console.log('✅ Background asset loading initiated successfully!');
         
     } catch (error) {
-        console.log('⚠️ Some priority assets failed to load, using fallbacks');
+        console.log('⚠️ Some assets failed to load, using fallbacks');
         IMAGES.loaded = true;
-        
-        // Все равно скрываем загрузку через 3 секунды
-        setTimeout(() => {
-            const loadingScreen = document.getElementById('loading-screen');
-            if (loadingScreen) {
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                }, 500);
-            }
-        }, 3000);
-    }
-}
-
-function loadImageWithProgress(src, targetObject, propertyName) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = function() {
-            targetObject[propertyName] = img;
-            assetsLoaded++;
-            console.log('✅ Loaded:', propertyName);
-            updateLoadingProgress();
-            resolve(true);
-        };
-        img.onerror = function() {
-            console.log('❌ Failed to load:', propertyName);
-            assetsLoaded++; // Считаем как загруженный чтобы не блокировать
-            updateLoadingProgress();
-            resolve(false);
-        };
-        img.src = src;
-    });
-}
-
-function loadRemainingAssetsInBackground() {
-    console.log('🔄 Loading remaining assets in background...');
-    
-    // Загружаем остальные изображения игрока
-    loadImageSilently(ASSETS.player.left, IMAGES.player, 'left');
-    
-    // Загружаем изображения врагов
-    for (const [enemyType, states] of Object.entries(ASSETS.enemies)) {
-        IMAGES.enemies[enemyType] = {};
-        
-        if (enemyType === 'tank' || enemyType === 'fast') {
-            for (const [state, pathData] of Object.entries(states)) {
-                if (Array.isArray(pathData)) {
-                    IMAGES.enemies[enemyType][state] = [];
-                    for (let i = 0; i < pathData.length; i++) {
-                        const path = pathData[i];
-                        const img = new Image();
-                        img.onload = function() {
-                            IMAGES.enemies[enemyType][state][i] = img;
-                            console.log(`✅ Background loaded ${enemyType} ${state} frame ${i}`);
-                        };
-                        img.onerror = function() {
-                            console.log(`❌ Background failed to load ${enemyType} ${state} frame ${i}`);
-                        };
-                        img.src = path;
-                    }
-                } else {
-                    loadImageSilently(pathData, IMAGES.enemies[enemyType], state);
-                }
-            }
-        } else {
-            for (const [state, path] of Object.entries(states)) {
-                loadImageSilently(path, IMAGES.enemies[enemyType], state);
-            }
-        }
     }
 }
 
@@ -404,12 +328,28 @@ function loadImageSilently(src, targetObject, propertyName) {
     const img = new Image();
     img.onload = function() {
         targetObject[propertyName] = img;
-        console.log('✅ Background loaded:', propertyName);
+        console.log('✅ Loaded:', propertyName, 'from', src);
     };
     img.onerror = function() {
-        console.log('❌ Background failed to load:', propertyName);
+        console.log('❌ Failed to load:', propertyName, 'from', src);
     };
     img.src = src;
+}
+
+function loadBackgroundSilently() {
+    const img = new Image();
+    img.onload = function() {
+        IMAGES.background = img;
+        console.log('✅ Background loaded silently');
+        
+        if (!gameRunning) {
+            drawStartScreen();
+        }
+    };
+    img.onerror = function() {
+        console.log('❌ Background failed to load, using fallback');
+    };
+    img.src = ASSETS.background;
 }
 
 function playSound(soundName) {
@@ -454,7 +394,7 @@ function playSound(soundName) {
     }
 }
 
-// Отрисовка стартового экрана (теперь мгновенная)
+// Отрисовка стартового экрана
 function drawStartScreen() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -650,17 +590,15 @@ function drawTower() {
         tower.x + tower.width/2, barY - 16);
 }
 
-// Инициализация игры с оптимизированной загрузкой
+// Инициализация игры с фоновой загрузкой
 function initGame() {
-    console.log('🎮 Initializing IRYS Base Defense with optimized loading...');
+    console.log('🎮 Initializing IRYS Base Defense...');
     
     drawStartScreen();
     updateUI();
-    
-    // Запускаем оптимизированную загрузку ассетов
     loadAllAssets();
     
-    console.log('✅ Game initialized - optimized assets loading');
+    console.log('✅ Game initialized - assets loading in background');
 }
 
 // UI update functions
@@ -671,4 +609,146 @@ function updateUI() {
     const irysCountEl = document.getElementById('irysCount');
     
     if (towerHealthEl) towerHealthEl.textContent = tower.health;
-    if (current
+    if (currentWaveEl) currentWaveEl.textContent = currentWave;
+    if (enemiesLeftEl) enemiesLeftEl.textContent = enemiesLeft + enemies.length;
+    if (irysCountEl) irysCountEl.textContent = irysCount;
+}
+
+// Initialize assets when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    initGame();
+});
+
+// УТИЛИТЫ
+const MathUtils = {
+    random(min, max) {
+        return Math.random() * (max - min) + min;
+    },
+    
+    randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+    
+    clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    },
+    
+    lerp(start, end, factor) {
+        return start + (end - start) * factor;
+    },
+    
+    distance(x1, y1, x2, y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+};
+
+const ImageUtils = {
+    isImageLoaded(img) {
+        return img && img.complete && img.naturalHeight !== 0;
+    },
+    
+    createImage(src, onLoad, onError) {
+        const img = new Image();
+        img.onload = onLoad || (() => {});
+        img.onerror = onError || (() => {});
+        img.src = src;
+        return img;
+    },
+    
+    scaleToFit(imgWidth, imgHeight, targetWidth, targetHeight) {
+        const scale = Math.min(targetWidth / imgWidth, targetHeight / imgHeight);
+        return {
+            width: imgWidth * scale,
+            height: imgHeight * scale,
+            scale: scale
+        };
+    }
+};
+
+const AnimationUtils = {
+    sine(time, amplitude = 1, frequency = 1, offset = 0) {
+        return Math.sin(time * frequency + offset) * amplitude;
+    },
+    
+    bounce(time, amplitude = 1, frequency = 1) {
+        return Math.abs(Math.sin(time * frequency)) * amplitude;
+    },
+    
+    pulse(time, minValue = 0.5, maxValue = 1, frequency = 1) {
+        return MathUtils.lerp(minValue, maxValue, 
+            (Math.sin(time * frequency) + 1) / 2);
+    }
+};
+
+const GameUtils = {
+    checkCollision(rect1, rect2) {
+        return rect1.x < rect2.x + rect2.width &&
+               rect1.x + rect1.width > rect2.x &&
+               rect1.y < rect2.y + rect2.height &&
+               rect1.y + rect1.height > rect2.y;
+    },
+    
+    checkCollisionWithTolerance(rect1, rect2, tolerance = 5) {
+        return rect1.x + tolerance < rect2.x + rect2.width &&
+               rect1.x + rect1.width - tolerance > rect2.x &&
+               rect1.y + tolerance < rect2.y + rect2.height &&
+               rect1.y + rect1.height - tolerance > rect2.y;
+    },
+    
+    isOnScreen(obj, canvasWidth, canvasHeight, margin = 50) {
+        return obj.x > -margin && 
+               obj.x < canvasWidth + margin &&
+               obj.y > -margin && 
+               obj.y < canvasHeight + margin;
+    },
+    
+    shake(intensity = 5, duration = 500) {
+        return {
+            x: MathUtils.random(-intensity, intensity),
+            y: MathUtils.random(-intensity, intensity),
+            intensity: intensity,
+            duration: duration,
+            startTime: Date.now()
+        };
+    }
+};
+
+const DebugUtils = {
+    log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const prefix = `[${timestamp}] [${type.toUpperCase()}]`;
+        console.log(`${prefix} ${message}`);
+    },
+    
+    drawHitbox(ctx, obj, color = 'red') {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(obj.x, obj.y, obj.width, obj.height);
+        ctx.restore();
+    },
+    
+    fpsCounter: {
+        frames: 0,
+        lastTime: 0,
+        fps: 0,
+        
+        update() {
+            this.frames++;
+            const now = performance.now();
+            if (now - this.lastTime >= 1000) {
+                this.fps = Math.round((this.frames * 1000) / (now - this.lastTime));
+                this.frames = 0;
+                this.lastTime = now;
+            }
+        },
+        
+        draw(ctx, x = 10, y = 30) {
+            ctx.save();
+            ctx.fillStyle = 'white';
+            ctx.font = '16px Arial';
+            ctx.fillText(`FPS: ${this.fps}`, x, y);
+            ctx.restore();
+        }
+    }
+};
