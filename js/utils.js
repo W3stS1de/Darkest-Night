@@ -4,7 +4,7 @@ function drawBackground() {
     if (IMAGES.background && IMAGES.background.complete && IMAGES.background.naturalHeight !== 0) {
         ctx.drawImage(IMAGES.background, 0, 0, canvas.width, canvas.height);
         
-        //  затемнение
+        // затемнение
         ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     } else {
@@ -191,10 +191,9 @@ let assetsLoaded = 0;
 let totalAssets = 0;
 
 function updateLoadingProgress() {
-    const progress = totalAssets > 0 ? (assetsLoaded / totalAssets) * 100 : 0;
     const loadingText = document.querySelector('.loading-text');
     if (loadingText) {
-        loadingText.textContent = `Loading assets... ${Math.round(progress)}%`;
+        loadingText.textContent = 'Loading...';
     }
     
     // Скрываем экран загрузки когда все готово
@@ -536,7 +535,7 @@ function drawTower() {
     if (IMAGES.tower && IMAGES.tower.complete && IMAGES.tower.naturalHeight !== 0) {
         ctx.drawImage(IMAGES.tower, tower.x, tower.y, tower.width, tower.height);
     } else {
-        // Мгновенный fallback - Medieval Tower
+        
         const towerGradient = ctx.createLinearGradient(tower.x, tower.y, tower.x + tower.width, tower.y + tower.height);
         towerGradient.addColorStop(0, '#7f8c8d');
         towerGradient.addColorStop(0.5, '#95a5a6');
@@ -548,7 +547,7 @@ function drawTower() {
         ctx.strokeStyle = '#5d6d70';
         ctx.lineWidth = 2;
         
-        // Horizontal lines (brick layers)
+        // Horizontal lines 
         for (let y = tower.y + 20; y < tower.y + tower.height; y += 25) {
             ctx.beginPath();
             ctx.moveTo(tower.x, y);
@@ -575,14 +574,14 @@ function drawTower() {
         ctx.fillText('IRYS', tower.x + tower.width/2, tower.y + tower.height/2);
         ctx.shadowBlur = 0;
         
-        // Tower top details (battlements)
+        // Tower top details
         ctx.fillStyle = '#8e9aa3';
         for (let x = tower.x; x < tower.x + tower.width; x += 25) {
             ctx.fillRect(x, tower.y - 10, 15, 15);
         }
     }
     
-    // УЛУЧШЕННАЯ ПОДСВЕТКА БАШНИ
+    
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
 
@@ -651,14 +650,14 @@ function drawTower() {
         tower.x + tower.width/2, barY - 16);
 }
 
-// Инициализация игры с оптимизированной загрузкой
+
 function initGame() {
     console.log('🎮 Initializing IRYS Base Defense with optimized loading...');
     
     drawStartScreen();
     updateUI();
     
-    // Запускаем оптимизированную загрузку ассетов
+    
     loadAllAssets();
     
     console.log('✅ Game initialized - optimized assets loading');
