@@ -132,27 +132,6 @@ const CONFIG = {
         stoneLight: '#718096',     
         mossColor: '#2d5016',      
         crackColor: '#171923'      
-    },
-
-    // Web3 configuration
-    web3: {
-        required: true,                    
-        network: {
-            chainId: '0x4f6',             
-            currency: 'IRYS',
-            rpcUrl: 'https://testnet-rpc.irys.xyz/v1/execution-rpc',
-            explorerUrl: 'https://storage-explorer.irys.xyz'
-        },
-        entryFee: '0.001',                
-        contractAddresses: {
-            entryFeeCollector: '0x92D696BFcA04E6241F2aaC813d0D14F8cf6c8D2b'
-        },
-        features: {
-            entryFeeRequired: true,        
-            scoreSubmission: false,        
-            leaderboard: false,            
-            rewards: false                 
-        }
     }
 };
 
@@ -292,240 +271,143 @@ const AUDIO = {
     musicPaused: false 
 };
 
-// WEB3 CONSTANTS
-const WEB3_CONSTANTS = {
-    IRYS_NETWORK: {
-        CHAIN_ID: 1270,
-        CHAIN_ID_HEX: '0x4f6',
-        NAME: 'Irys Network',
-        CURRENCY: 'IRYS',
-        RPC_URL: 'https://testnet-rpc.irys.xyz/v1/execution-rpc',
-        EXPLORER_URL: 'https://storage-explorer.irys.xyz'
+// УТИЛИТЫ
+const MathUtils = {
+    random(min, max) {
+        return Math.random() * (max - min) + min;
     },
     
-    ENTRY_FEE: {
-        AMOUNT: '0.001',
-        WEI: '1000000000000000', 
-        DESCRIPTION: '0.001 IRYS entry fee'
+    randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     },
     
-    GAS_SETTINGS: {
-        MAX_FEE_PER_GAS: '20', 
-        MAX_PRIORITY_FEE_PER_GAS: '2', 
-        GAS_LIMIT_BUFFER: 1.2 
+    clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
     },
     
-    CONTRACT_ADDRESSES: {
-        ENTRY_FEE_COLLECTOR: '0x92D696BFcA04E6241F2aaC813d0D14F8cf6c8D2b'
+    lerp(start, end, factor) {
+        return start + (end - start) * factor;
     },
     
-    FEATURES: {
-        REQUIRE_ENTRY_FEE: true,    
-        SUBMIT_SCORES: false,       
-        LOAD_LEADERBOARD: false,    
-        AUTO_REWARDS: false,        
-        PERSISTENT_SESSIONS: false  
+    distance(x1, y1, x2, y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 };
 
-// функции утилиты 
-const WEB3_UTILS = {
-    
-    isValidAddress(address) {
-        return address && /^0x[a-fA-F0-9]{40}$/.test(address);
+const ImageUtils = {
+    isImageLoaded(img) {
+        return img && img.complete && img.naturalHeight !== 0;
     },
     
-    formatAddress(address) {
-        if (!address) return 'N/A';
-        if (!this.isValidAddress(address)) return 'Invalid';
-        return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+    createImage(src, onLoad, onError) {
+        const img = new Image();
+        img.onload = onLoad || (() => {});
+        img.onerror = onError || (() => {});
+        img.src = src;
+        return img;
     },
     
-    ethToWei(ethAmount) {
-        if (typeof ethers !== 'undefined') {
-            return ethers.parseEther(ethAmount.toString());
-        }
-        
-        return BigInt(Math.floor(parseFloat(ethAmount) * 1e18));
-    },
-    
-    weiToEth(weiAmount) {
-        if (typeof ethers !== 'undefined') {
-            return ethers.formatEther(weiAmount);
-        }
-        
-        return (parseFloat(weiAmount) / 1e18).toFixed(6);
-    },
-    
-    isCorrectNetwork(chainId) {
-        const expected = WEB3_CONSTANTS.IRYS_NETWORK.CHAIN_ID_HEX;
-        return chainId === expected;
-    },
-    
-    getNetworkConfig() {
+    scaleToFit(imgWidth, imgHeight, targetWidth, targetHeight) {
+        const scale = Math.min(targetWidth / imgWidth, targetHeight / imgHeight);
         return {
-            chainId: WEB3_CONSTANTS.IRYS_NETWORK.CHAIN_ID_HEX,
-            chainName: WEB3_CONSTANTS.IRYS_NETWORK.NAME,
-            nativeCurrency: {
-                name: WEB3_CONSTANTS.IRYS_NETWORK.CURRENCY,
-                symbol: WEB3_CONSTANTS.IRYS_NETWORK.CURRENCY,
-                decimals: 18
-            },
-            rpcUrls: [WEB3_CONSTANTS.IRYS_NETWORK.RPC_URL],
-            blockExplorerUrls: [WEB3_CONSTANTS.IRYS_NETWORK.EXPLORER_URL]
+            width: imgWidth * scale,
+            height: imgHeight * scale,
+            scale: scale
         };
-    },
-    
-    hasMinimumBalance(balanceWei) {
-        const entryFeeWei = this.ethToWei(WEB3_CONSTANTS.ENTRY_FEE.AMOUNT);
-        const gasEstimateWei = this.ethToWei('0.0001'); 
-        const requiredWei = entryFeeWei + gasEstimateWei;
-        
-        return BigInt(balanceWei) >= requiredWei;
-    },
-    
-    createEntryFeeTransaction(fromAddress) {
-        return {
-            to: WEB3_CONSTANTS.CONTRACT_ADDRESSES.ENTRY_FEE_COLLECTOR,
-            from: fromAddress,
-            value: this.ethToWei(WEB3_CONSTANTS.ENTRY_FEE.AMOUNT),
-            maxFeePerGas: this.ethToWei(WEB3_CONSTANTS.GAS_SETTINGS.MAX_FEE_PER_GAS + 'e-9'),
-            maxPriorityFeePerGas: this.ethToWei(WEB3_CONSTANTS.GAS_SETTINGS.MAX_PRIORITY_FEE_PER_GAS + 'e-9')
-        };
-    },
-    
-    formatTxId(txId) {
-        if (!txId) return 'N/A';
-        return `${txId.substring(0, 8)}...${txId.substring(txId.length - 4)}`;
     }
 };
 
-function validateConfig() {
-    const errors = [];
+const AnimationUtils = {
+    sine(time, amplitude = 1, frequency = 1, offset = 0) {
+        return Math.sin(time * frequency + offset) * amplitude;
+    },
     
-    if (CONFIG.web3.required) {
-        if (!WEB3_UTILS.isValidAddress(WEB3_CONSTANTS.CONTRACT_ADDRESSES.ENTRY_FEE_COLLECTOR)) {
-            errors.push('Invalid ENTRY_FEE_COLLECTOR address. Please set a valid Ethereum address.');
-        }
-        
-        if (!WEB3_CONSTANTS.ENTRY_FEE.AMOUNT || parseFloat(WEB3_CONSTANTS.ENTRY_FEE.AMOUNT) <= 0) {
-            errors.push('Invalid entry fee amount. Must be greater than 0.');
-        }
-        
-        if (!WEB3_CONSTANTS.IRYS_NETWORK.RPC_URL || !WEB3_CONSTANTS.IRYS_NETWORK.RPC_URL.startsWith('http')) {
-            errors.push('Invalid RPC URL for Irys Network.');
-        }
+    bounce(time, amplitude = 1, frequency = 1) {
+        return Math.abs(Math.sin(time * frequency)) * amplitude;
+    },
+    
+    pulse(time, minValue = 0.5, maxValue = 1, frequency = 1) {
+        return MathUtils.lerp(minValue, maxValue, 
+            (Math.sin(time * frequency) + 1) / 2);
     }
-    
-    if (!ASSETS.background) {
-        console.warn('Background image path not set');
-    }
-    
-    if (!ASSETS.audio.backgroundMusic || !ASSETS.audio.backgroundMusic2) {
-        console.warn('Background music paths not set');
-    }
-    
-    if (errors.length > 0) {
-        console.error('❌ Configuration errors:');
-        errors.forEach(error => console.error('  -', error));
-        return false;
-    }
-    
-    console.log('✅ Configuration validated successfully');
-    return true;
-}
+};
 
-function initWeb3Constants() {
-    console.log('🔧 Initializing Web3 constants for Irys Network...');
+const GameUtils = {
+    checkCollision(rect1, rect2) {
+        return rect1.x < rect2.x + rect2.width &&
+               rect1.x + rect1.width > rect2.x &&
+               rect1.y < rect2.y + rect2.height &&
+               rect1.y + rect1.height > rect2.y;
+    },
     
-    const criticalChecks = [
-        {
-            name: 'Irys Network Chain ID',
-            value: WEB3_CONSTANTS.IRYS_NETWORK.CHAIN_ID_HEX,
-            valid: WEB3_CONSTANTS.IRYS_NETWORK.CHAIN_ID_HEX === '0x4f6'
-        },
-        {
-            name: 'Entry Fee Collector Address',
-            value: WEB3_CONSTANTS.CONTRACT_ADDRESSES.ENTRY_FEE_COLLECTOR,
-            valid: WEB3_UTILS.isValidAddress(WEB3_CONSTANTS.CONTRACT_ADDRESSES.ENTRY_FEE_COLLECTOR)
-        },
-        {
-            name: 'Entry Fee Amount',
-            value: WEB3_CONSTANTS.ENTRY_FEE.AMOUNT,
-            valid: parseFloat(WEB3_CONSTANTS.ENTRY_FEE.AMOUNT) > 0
-        }
-    ];
+    checkCollisionWithTolerance(rect1, rect2, tolerance = 5) {
+        return rect1.x + tolerance < rect2.x + rect2.width &&
+               rect1.x + rect1.width - tolerance > rect2.x &&
+               rect1.y + tolerance < rect2.y + rect2.height &&
+               rect1.y + rect1.height - tolerance > rect2.y;
+    },
     
-    let allValid = true;
-    console.log('🔍 Checking Web3 configuration:');
+    isOnScreen(obj, canvasWidth, canvasHeight, margin = 50) {
+        return obj.x > -margin && 
+               obj.x < canvasWidth + margin &&
+               obj.y > -margin && 
+               obj.y < canvasHeight + margin;
+    },
     
-    criticalChecks.forEach(check => {
-        if (check.valid) {
-            console.log(`  ✅ ${check.name}: ${check.value}`);
-        } else {
-            console.error(`  ❌ ${check.name}: ${check.value} (INVALID)`);
-            allValid = false;
-        }
-    });
-    
-    if (allValid) {
-        console.log('✅ All Web3 constants are properly configured');
-    } else {
-        console.error('❌ Some Web3 constants are incorrectly configured');
+    shake(intensity = 5, duration = 500) {
+        return {
+            x: MathUtils.random(-intensity, intensity),
+            y: MathUtils.random(-intensity, intensity),
+            intensity: intensity,
+            duration: duration,
+            startTime: Date.now()
+        };
     }
-    
-    return allValid;
-}
+};
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🔧 Validating game configuration...');
+const DebugUtils = {
+    log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const prefix = `[${timestamp}] [${type.toUpperCase()}]`;
+        console.log(`${prefix} ${message}`);
+    },
     
-    const isConfigValid = validateConfig();
-    const isWeb3Valid = initWeb3Constants();
+    drawHitbox(ctx, obj, color = 'red') {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(obj.x, obj.y, obj.width, obj.height);
+        ctx.restore();
+    },
     
-    if (!isConfigValid || !isWeb3Valid) {
-        console.error('❌ Configuration validation failed! Please fix the errors above.');
+    fpsCounter: {
+        frames: 0,
+        lastTime: 0,
+        fps: 0,
         
-        const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 0, 0, 0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            font-family: Arial, sans-serif;
-            font-weight: bold;
-            text-align: center;
-            z-index: 10000;
-            max-width: 500px;
-        `;
-        errorDiv.innerHTML = `
-            <h3>⚠️ Configuration Error</h3>
-            <p>Please check the browser console for details and fix the configuration in config.js</p>
-            <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 8px 16px; background: white; color: red; border: none; border-radius: 5px; cursor: pointer;">Close</button>
-        `;
-        document.body.appendChild(errorDiv);
-    } else {
-        console.log('Game configuration loaded successfully!');
-        console.log('Irys Network Integration:');
-        console.log('  - Network:', WEB3_CONSTANTS.IRYS_NETWORK.NAME);
-        console.log('  - Chain ID:', WEB3_CONSTANTS.IRYS_NETWORK.CHAIN_ID_HEX);
-        console.log('  - Entry fee:', WEB3_CONSTANTS.ENTRY_FEE.DESCRIPTION);
-        console.log('  - Collector address:', WEB3_CONSTANTS.CONTRACT_ADDRESSES.ENTRY_FEE_COLLECTOR);
-        console.log('  - Entry fee required:', CONFIG.web3.features.entryFeeRequired);
-        console.log('  - Score submission: DISABLED');
-        console.log('  - Leaderboard: DISABLED');
+        update() {
+            this.frames++;
+            const now = performance.now();
+            if (now - this.lastTime >= 1000) {
+                this.fps = Math.round((this.frames * 1000) / (now - this.lastTime));
+                this.frames = 0;
+                this.lastTime = now;
+            }
+        },
+        
+        draw(ctx, x = 10, y = 30) {
+            ctx.save();
+            ctx.fillStyle = 'white';
+            ctx.font = '16px Arial';
+            ctx.fillText(`FPS: ${this.fps}`, x, y);
+            ctx.restore();
+        }
     }
-});
+};
 
 window.CONFIG = CONFIG;
 window.ASSETS = ASSETS;
 window.IMAGES = IMAGES;
 window.AUDIO = AUDIO;
-window.WEB3_CONSTANTS = WEB3_CONSTANTS;
-window.WEB3_UTILS = WEB3_UTILS;
 
-console.log('Enhanced config.js loaded with simplified Irys Network support!');
+console.log('Game config.js loaded successfully!');
