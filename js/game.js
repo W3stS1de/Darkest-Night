@@ -14,10 +14,6 @@ let frameCount = 0;
 let gameStartTime = 0;
 let gameDuration = 0;
 
-// Web3 Integration flags
-let web3Enabled = false;
-let entryFeePaid = false;
-
 let gameInitialized = false;
 let audioEnabled = false;
 
@@ -246,52 +242,6 @@ function updateUI() {
     }
 }
 
-// Web3 Integration 
-function checkWeb3Requirements() {
-    if (typeof window.web3Game !== 'undefined') {
-        web3Enabled = true;
-        entryFeePaid = window.web3Game.isEntryPaid();
-        
-        console.log('🔗 Web3 status check:');
-        console.log('  - Web3 enabled:', web3Enabled);
-        console.log('  - Entry paid:', entryFeePaid);
-        console.log('  - Web3 ready:', window.web3Game.isWeb3Ready());
-        console.log('  - On correct network:', window.web3Game.isOnCorrectNetwork());
-        
-        return entryFeePaid && window.web3Game.isOnCorrectNetwork();
-    }
-    
-    console.log('⚠️ Web3 not available, playing in offline mode');
-    return false;
-}
-
-function updateStartButtonState() {
-    const startBtn = document.getElementById('startBtn');
-    if (!startBtn) return;
-    
-    const web3Ready = checkWeb3Requirements();
-    
-    if (web3Ready) {
-        startBtn.disabled = false;
-        startBtn.classList.remove('disabled');
-        startBtn.classList.add('enabled');
-        startBtn.textContent = 'START GAME';
-    } else {
-        startBtn.disabled = true;
-        startBtn.classList.add('disabled');
-        startBtn.classList.remove('enabled');
-        
-        if (!web3Enabled) {
-            startBtn.textContent = 'Connect Wallet First';
-        } else if (!window.web3Game.isOnCorrectNetwork()) {
-            startBtn.textContent = 'Switch to Irys Network';
-        } else {
-            startBtn.textContent = 'Pay the entry fee to start playing';
-        }
-    }
-}
-
-
 initGameAudio();
 
 // Collision detection
@@ -443,20 +393,12 @@ async function endGame() {
     if (finalIrysEl) finalIrysEl.textContent = irysCount;
     if (gameOverScreenEl) gameOverScreenEl.style.display = 'flex';
     
-    if (web3Enabled && entryFeePaid && typeof window.web3Game !== 'undefined') {
-        web3GameState.entryPaid = false;
-        updateWalletUI();
-        updateStartButton();
-    }
-    
     console.log('💀 Game Over - Wave:', currentWave, 'Kills:', totalKills, 'IRYS:', irysCount);
 }
 
 function restartGame() {
     const startBtnEl = document.getElementById('startBtn');
     if (startBtnEl) startBtnEl.style.display = 'inline-block';
-    
-    updateStartButtonState();
     
     startGame();
 }
@@ -500,27 +442,6 @@ function spawnEnemy() {
 function startGame() {
     console.log('🎮 Starting IRYS Base Defense...');
     
-    if (!checkWeb3Requirements()) {
-        console.log('❌ Web3 requirements not met - cannot start game');
-        updateStartButtonState();
-        
-        if (typeof showNotification !== 'undefined') {
-            if (!web3Enabled) {
-                showNotification('Please connect your wallet to Irys Network first!', 'error');
-            } else if (!window.web3Game.isOnCorrectNetwork()) {
-                showNotification('Please switch to Irys Network!', 'error');
-            } else {
-                showNotification('Please pay the entry fee first!', 'error');
-            }
-        }
-        return;
-    }
-    
-    console.log('✅ Web3 requirements met - starting game');
-    console.log('  - Player address:', window.web3Game.getPlayerAddress());
-    console.log('  - Entry paid:', window.web3Game.isEntryPaid());
-    console.log('  - Correct network:', window.web3Game.isOnCorrectNetwork());
-    
     if (!audioEnabled) {
         audioEnabled = true;
         AUDIO.enabled = true;
@@ -559,7 +480,7 @@ function startGame() {
     // Start game loop
     gameLoop();
     
-    console.log('🚀 Game started successfully on Irys Network!');
+    console.log('🚀 Game started successfully!');
 }
 
 // Main game loop
@@ -623,11 +544,7 @@ function initGame() {
     
     updateUI();
     
-    setInterval(() => {
-        updateStartButtonState();
-    }, 1000);
-    
-    console.log('✅ Game initialized - Web3 integration active');
+    console.log('✅ Game initialized');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -636,16 +553,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof loadAllAssets === 'function') {
         loadAllAssets();
     }
-    
-    setTimeout(() => {
-        if (typeof window.web3Game !== 'undefined') {
-            console.log('🔗 Web3 integration detected after delay');
-            web3Enabled = true;
-            updateStartButtonState();
-        } else {
-            console.log('⚠️ Web3 integration not available after delay');
-        }
-    }, 2000);
 });
 
 function toggleAudio() {
@@ -678,21 +585,8 @@ function toggleAudio() {
     }
 }
 
-function getWeb3Status() {
-    return {
-        enabled: web3Enabled,
-        entryPaid: entryFeePaid,
-        connected: typeof window.web3Game !== 'undefined' && window.web3Game.isWeb3Ready(),
-        networkCorrect: typeof window.web3Game !== 'undefined' && window.web3Game.isOnCorrectNetwork(),
-        playerAddress: typeof window.web3Game !== 'undefined' ? window.web3Game.getPlayerAddress() : null
-    };
-}
-
 window.gameController = {
     startGame,
     restartGame,
-    toggleAudio,
-    updateStartButtonState,
-    checkWeb3Requirements,
-    getWeb3Status
+    toggleAudio
 };
