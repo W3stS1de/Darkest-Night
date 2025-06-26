@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Darkest Night - Web3 Edition</title>
+    <title>Darkest Night</title>
     
     
     <link rel="preload" href="assets/backgrounds/menu_background.png" as="image">
@@ -12,167 +12,9 @@
     <link rel="preload" href="assets/buildings/tower.png" as="image">
     
     <link rel="stylesheet" href="css/styles.css">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.8.0/ethers.umd.min.js"></script>
-
-    <script src="https://unpkg.com/buffer@6.0.3/index.js"></script>
-    <script src="https://unpkg.com/process@0.11.10/browser.js"></script>
-
-    <script>
-        if (typeof global === 'undefined') {
-            window.global = window;
-            global = window;
-        }
-        
-        if (typeof window.Buffer === 'undefined' && typeof buffer !== 'undefined') {
-            window.Buffer = buffer.Buffer;
-            global.Buffer = buffer.Buffer;
-        }
-        
-        if (typeof window.process === 'undefined') {
-            window.process = global.process = {
-                env: { NODE_ENV: 'production', BROWSER: true },
-                nextTick: function(fn) { setTimeout(fn, 0); },
-                version: 'v18.0.0',
-                versions: { node: '18.0.0' },
-                platform: 'browser',
-                browser: true,
-                argv: [],
-                cwd: function() { return '/'; }
-            };
-        }
-        
-        if (!window.crypto || !window.crypto.getRandomValues) {
-            window.crypto = window.crypto || {};
-            window.crypto.getRandomValues = function(array) {
-                for (let i = 0; i < array.length; i++) {
-                    array[i] = Math.floor(Math.random() * 256);
-                }
-                return array;
-            };
-        }
-        global.crypto = window.crypto;
-        
-        console.log('🔧 Crypto polyfills loaded');
-    </script>
-
-    <script type="module">
-        console.log('🔄 Loading REAL Irys modules...');
-        
-        async function loadRealIrysModules() {
-            const methods = [
-                {
-                    name: 'ESM.SH',
-                    load: async () => {
-                        const [uploader, ethereum] = await Promise.all([
-                            import('https://esm.sh/@irys/web-upload@0.0.11'),
-                            import('https://esm.sh/@irys/web-upload-ethereum@0.0.8')
-                        ]);
-                        return {
-                            WebUploader: uploader.WebUploader || uploader.default,
-                            WebEthereum: ethereum.WebEthereum || ethereum.default
-                        };
-                    }
-                },
-                {
-                    name: 'JSDelivr',
-                    load: async () => {
-                        const [uploader, ethereum] = await Promise.all([
-                            import('https://cdn.jsdelivr.net/npm/@irys/web-upload@0.0.11/+esm'),
-                            import('https://cdn.jsdelivr.net/npm/@irys/web-upload-ethereum@0.0.8/+esm')
-                        ]);
-                        return {
-                            WebUploader: uploader.WebUploader || uploader.default,
-                            WebEthereum: ethereum.WebEthereum || ethereum.default
-                        };
-                    }
-                }
-            ];
-            
-            for (const method of methods) {
-                try {
-                    console.log(`🔄 Trying ${method.name}...`);
-                    const modules = await method.load();
-                    
-                    if (modules.WebUploader && modules.WebEthereum) {
-                        window.IrysWebUploader = modules.WebUploader;
-                        window.IrysWebEthereum = modules.WebEthereum;
-                        
-                        console.log(`✅ REAL Irys modules loaded via ${method.name}!`);
-                        window.dispatchEvent(new CustomEvent('irysModulesLoaded'));
-                        return true;
-                    }
-                } catch (error) {
-                    console.log(`❌ ${method.name} failed:`, error.message);
-                    continue;
-                }
-            }
-            
-            throw new Error('All methods failed');
-        }
-        
-        loadRealIrysModules().catch(error => {
-            console.error('FAILED to load REAL Irys modules:', error.message);
-            
-            setTimeout(() => {
-                const walletStatus = document.getElementById('walletStatus');
-                if (walletStatus) {
-                    walletStatus.textContent = '❌Failed to connect wallet. Refresh page.';
-                    walletStatus.className = 'wallet-status error';
-                }
-            }, 1000);
-            
-            window.dispatchEvent(new CustomEvent('irysModulesFailed'));
-        });
-    </script>
-
-    <script>
-        function waitForIrysModules() {
-            return new Promise((resolve, reject) => {
-                console.log('⏳ Waiting for REAL Irys modules...');
-                
-                if (typeof window.IrysWebUploader !== 'undefined' && 
-                    typeof window.IrysWebEthereum !== 'undefined') {
-                    console.log('✅ REAL Irys modules ready');
-                    resolve(true);
-                    return;
-                }
-                
-                let resolved = false;
-                
-                window.addEventListener('irysModulesLoaded', () => {
-                    if (!resolved) {
-                        resolved = true;
-                        console.log(' REAL Irys modules loaded successfully!');
-                        resolve(true);
-                    }
-                }, { once: true });
-                
-                window.addEventListener('irysModulesFailed', () => {
-                    if (!resolved) {
-                        resolved = true;
-                        console.log(' REAL Irys modules failed');
-                        reject(new Error('Real Irys modules failed to load'));
-                    }
-                }, { once: true });
-                
-                setTimeout(() => {
-                    if (!resolved) {
-                        resolved = true;
-                        console.log(' Timeout waiting for Irys modules');
-                        reject(new Error('Timeout loading Irys modules'));
-                    }
-                }, 15000);
-            });
-        }
-        
-        window.waitForIrysModules = waitForIrysModules;
-        console.log(' REAL Irys integration ready');
-    </script>
-
 </head>
 <body>
-    <!-- LOADING INDICATOR -->
+    
     <div id="loading-screen" class="loading-screen">
         <div class="loading-content">
             <h1 class="loading-title">Darkest Night</h1>
@@ -181,57 +23,16 @@
         </div>
     </div>
 
-    <!-- Web3 Notification -->
-    <div id="web3-notification" class="web3-notification"></div>
-
-    <!-- Game Title Section -->
+    
     <h1 class="game-title">Darkest Night</h1>
     
-    <!-- PAYMENT SECTION -->
-    <div class="wallet-section" id="walletSection">
-        <div class="wallet-header">
-            <div class="wallet-status info" id="walletStatus">
-                Connect your wallet 
-            </div>
-        </div>
-        
-        <!-- Connect Wallet Button -->
-        <button class="connect-wallet-btn" id="connectWallet">
-             Connect Wallet
-        </button>
-        
-        <!-- Wallet Info (hidden by default) -->
-        <div class="wallet-info" id="walletInfo" style="display: none;">
-            <div class="wallet-details">
-                <div class="wallet-item">
-                    <span class="label">Address:</span>
-                    <span class="value" id="userAddress">Not connected</span>
-                </div>
-                <div class="wallet-item">
-                    <span class="label">Network:</span>
-                    <span class="value" id="currentNetwork">Unknown</span>
-                </div>
-                <div class="wallet-item">
-                    <span class="label">IRYS Balance:</span>
-                    <span class="value" id="userBalance">0.0000</span>
-                </div>
-            </div>
-            
-            <div class="wallet-actions">
-                <button class="pay-entry-btn" id="payEntry">
-                    PLAY NOW
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- GAME SECTION -->
+   
     <div class="game-section">
-        <!-- Game Container -->
+        
         <div class="game-container">
             <canvas id="gameCanvas" width="900" height="500"></canvas>
             
-            <!-- Game Over Screen -->
+            
             <div class="game-over-screen" id="gameOverScreen">
                 <div class="game-over-title">TOWER DESTROYED</div>
                 <div class="final-stats">
@@ -245,7 +46,7 @@
             </div>
         </div>
 
-        <!-- Game UI Panel -->
+        
         <div class="ui-panel">
             <div class="stat-item">
                 <div class="stat-value" id="towerHealth">100</div>
@@ -269,10 +70,10 @@
             </div>
         </div>
 
-        <!-- Game Controls -->
+        
         <div class="controls">
             <div class="button-container">
-                <button class="start-btn disabled" onclick="startGame()" id="startBtn">
+                <button class="start-btn enabled" onclick="startGame()" id="startBtn">
                     START GAME
                 </button>
                 
@@ -291,42 +92,14 @@
         by WestSide
     </div>
 
-    <!-- SCRIPTS -->
+    
     <script src="js/config.js"></script>
     <script src="js/classes.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/game.js"></script>
     
-    <!-- OPTIMIZED WEB3 INTEGRATION -->
     <script>
-        console.log('🔗 Initializing Irys Network Web3 integration...');
         
-        const IRYS_NETWORK_CONFIG = {
-            chainId: '0x4f6', 
-            chainName: 'Irys Network',
-            nativeCurrency: {
-                name: 'IRYS',
-                symbol: 'IRYS',
-                decimals: 18
-            },
-            rpcUrls: ['https://testnet-rpc.irys.xyz/v1/execution-rpc'],
-            blockExplorerUrls: ['https://storage-explorer.irys.xyz']
-        };
-
-        const ENTRY_FEE_COLLECTOR = "0x92D696BFcA04E6241F2aaC813d0D14F8cf6c8D2b";
-        
-        let web3GameState = {
-            connected: false,
-            userAddress: null,
-            entryPaid: false,
-            balance: '0',
-            currentNetwork: null,
-            onCorrectNetwork: false,
-            provider: null,
-            signer: null
-        };
-
-        // LOADING SCREEN MANAGEMENT
         function hideLoadingScreen() {
             const loadingScreen = document.getElementById('loading-screen');
             if (loadingScreen) {
@@ -344,518 +117,18 @@
             }
         }
 
-        // WEB3 FUNCTIONS (same as before but with loading updates)
-        async function initializeIrysUploader() {
-            try {
-                console.log('🔄 Initializing Irys uploader...');
-                updateLoadingText('Initializing Irys uploader...');
-                
-                if (typeof window.IrysWebUploader === 'undefined' || typeof window.IrysWebEthereum === 'undefined') {
-                    throw new Error('Irys modules not loaded from CDN');
-                }
-                
-                if (!web3GameState.provider) {
-                    throw new Error('Web3 provider not available');
-                }
-                
-                const irys = await window.IrysWebUploader(window.IrysWebEthereum)
-                    .withProvider(web3GameState.provider);
-                
-                console.log('✅ Irys uploader initialized successfully');
-                
-                try {
-                    const balance = await irys.getBalance();
-                    console.log(' Irys balance check successful:', balance);
-                } catch (balanceError) {
-                    console.log('⚠Balance check failed (normal for new wallets):', balanceError.message);
-                }
-                
-                return irys;
-                
-            } catch (error) {
-                console.error('❌ Failed to initialize Irys uploader:', error);
-                throw error;
-            }
-        }
-        
-        async function getCurrentNetwork() {
-            try {
-                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                console.log('🔗 Current chain ID:', chainId);
-                
-                web3GameState.currentNetwork = chainId;
-                web3GameState.onCorrectNetwork = chainId === IRYS_NETWORK_CONFIG.chainId;
-                
-                return {
-                    chainId,
-                    isIrysNetwork: chainId === IRYS_NETWORK_CONFIG.chainId
-                };
-            } catch (error) {
-                console.error('❌ Failed to get current network:', error);
-                return { chainId: null, isIrysNetwork: false };
-            }
-        }
-        
-        async function addIrysNetwork() {
-            try {
-                console.log('Adding Irys Network to MetaMask...');
-                
-                await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [IRYS_NETWORK_CONFIG]
-                });
-                
-                console.log('✅ Irys Network added successfully');
-                showNotification('Irys Network added to MetaMask!', 'success');
-                return true;
-                
-            } catch (error) {
-                console.error('❌ Failed to add Irys Network:', error);
-                
-                if (error.code === 4001) {
-                    showNotification('User rejected adding Irys Network', 'error');
-                } else {
-                    showNotification(`Failed to add network: ${error.message}`, 'error');
-                }
-                return false;
-            }
-        }
-        
-        async function switchToIrysNetwork() {
-            try {
-                console.log('🔄 Switching to Irys Network...');
-                
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: IRYS_NETWORK_CONFIG.chainId }]
-                });
-                
-                console.log('✅ Switched to Irys Network');
-                showNotification('Switched to Irys Network!', 'success');
-                return true;
-                
-            } catch (error) {
-                console.error('❌ Failed to switch network:', error);
-                
-                if (error.code === 4902) {
-                    console.log('🔄 Network not found, attempting to add...');
-                    return await addIrysNetwork();
-                } else if (error.code === 4001) {
-                    showNotification('User rejected network switch', 'error');
-                    return false;
-                } else {
-                    showNotification(`Failed to switch network: ${error.message}`, 'error');
-                    return false;
-                }
-            }
-        }
-        
-        function checkMetaMaskAvailable() {
-            return new Promise((resolve) => {
-                if (typeof window.ethereum !== 'undefined') {
-                    console.log('✅ MetaMask available immediately');
-                    resolve(true);
-                } else {
-                    setTimeout(() => {
-                        if (typeof window.ethereum !== 'undefined') {
-                            console.log('✅ MetaMask available after delay');
-                            resolve(true);
-                        } else {
-                            console.log('❌ MetaMask not found');
-                            resolve(false);
-                        }
-                    }, 1000);
-                }
-            });
-        }
-
-        async function checkBalance() {
-            try {
-                const balance = await web3GameState.provider.getBalance(web3GameState.userAddress);
-                const balanceInEth = ethers.formatEther(balance);
-                
-                console.log('Current balance:', balanceInEth, 'IRYS');
-                
-                const entryFee = ethers.parseEther("0.001");
-                const estimatedGas = ethers.parseEther("0.0001"); 
-                const requiredAmount = entryFee + estimatedGas;
-                
-                if (balance < requiredAmount) {
-                    throw new Error(`Insufficient balance. Required: ${ethers.formatEther(requiredAmount)} IRYS`);
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('❌ Balance check failed:', error);
-                throw error;
-            }
-        }
-        
-        async function connectWallet() {
-            try {
-                console.log('🔄 Starting wallet connection...');
-                
-                updateConnectButton('Checking MetaMask...', true);
-                
-                const isMetaMaskAvailable = await checkMetaMaskAvailable();
-                if (!isMetaMaskAvailable) {
-                    throw new Error('MetaMask not found! Please install MetaMask extension and refresh the page.');
-                }
-
-                if (typeof ethers === 'undefined') {
-                    console.error('❌ Ethers.js not loaded!');
-                    throw new Error('Ethers.js library not loaded. Please check your internet connection and refresh.');
-                }
-                
-                updateConnectButton('Connecting...', true);
-                updateWalletStatus('Requesting wallet connection...', 'info');
-                
-                console.log('Requesting MetaMask connection...');
-                
-                const accounts = await window.ethereum.request({
-                    method: 'eth_requestAccounts',
-                    params: []
-                });
-                
-                console.log('Received accounts:', accounts);
-                
-                if (!accounts || accounts.length === 0) {
-                    throw new Error('No accounts returned. Please unlock MetaMask and try again.');
-                }
-                
-                updateConnectButton('Checking network...', true);
-                const networkInfo = await getCurrentNetwork();
-                
-                if (!networkInfo.isIrysNetwork) {
-                    console.log('🔄 Not on Irys Network, attempting to switch...');
-                    updateWalletStatus('Switching to Irys Network...', 'info');
-                    updateConnectButton('Switching Network...', true);
-                    
-                    const switched = await switchToIrysNetwork();
-                    if (!switched) {
-                        throw new Error('Failed to switch to Irys Network. Please add Irys Network manually.');
-                    }
-                    
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    const newNetworkInfo = await getCurrentNetwork();
-                    if (!newNetworkInfo.isIrysNetwork) {
-                        throw new Error('Still not on Irys Network after switch attempt.');
-                    }
-                }
-                
-                updateConnectButton('Getting balance...', true);
-                
-                try {
-                    web3GameState.provider = new ethers.BrowserProvider(window.ethereum);
-                    web3GameState.signer = await web3GameState.provider.getSigner();
-                    const balance = await web3GameState.provider.getBalance(accounts[0]);
-                    const balanceEther = ethers.formatEther(balance);
-                    
-                    web3GameState.connected = true;
-                    web3GameState.userAddress = accounts[0];
-                    web3GameState.balance = balance.toString();
-                    web3GameState.onCorrectNetwork = true;
-                    
-                    console.log(' Connection successful!');
-                    console.log(' Address:', accounts[0]);
-                    console.log(' Balance:', balanceEther, 'IRYS');
-                    console.log(' Network: Irys Network');
-                    
-                    updateWalletUI();
-                    updateWalletStatus('Connected to Irys Network successfully', 'success');
-                    updateStartButton();
-
-                    console.log('🔄 Testing Irys uploader initialization...');
-                    try {
-                        const testUploader = await initializeIrysUploader();
-                        console.log(' Irys uploader test successful!');
-                        
-                    } catch (uploaderError) {
-                        console.error('❌ Irys uploader test failed:', uploaderError);
-                        console.log('Will use simulation mode for score submission');
-                        showNotification('Irys uploader test failed - using simulation', 'warning');
-                    }
-
-                    showNotification(`Connected to Irys Network: ${formatAddress(accounts[0])}`, 'success');
-                            
-                } catch (balanceError) {
-                    console.error('❌ Balance fetch failed:', balanceError);
-                    
-                    web3GameState.connected = true;
-                    web3GameState.userAddress = accounts[0];
-                    web3GameState.balance = "0";
-                    web3GameState.onCorrectNetwork = true;
-                    
-                    updateWalletUI();
-                    updateWalletStatus('Wrong network. Please switch to Irys Network', 'warning');
-                    updateStartButton();
-                }
-                
-            } catch (error) {
-                console.error('❌ Connection failed:', error);
-                
-                let errorMessage = error.message;
-                
-                if (error.code === 4001) {
-                    errorMessage = 'Connection rejected by user';
-                } else if (error.code === -32002) {
-                    errorMessage = 'Connection request already pending. Please check MetaMask.';
-                } else if (error.message.includes('User rejected')) {
-                    errorMessage = 'Connection cancelled by user';
-                }
-                
-                updateWalletStatus(`Connection failed: ${errorMessage}`, 'error');
-                updateConnectButton('Connect MetaMask', false);
-                showNotification(`Connection failed: ${errorMessage}`, 'error');
-                
-                if (errorMessage.includes('network') || errorMessage.includes('Network')) {
-                    document.getElementById('addNetworkBtn').style.display = 'inline-block';
-                }
-            }
-        }
-        
-        async function addNetworkManually() {
-            const success = await addIrysNetwork();
-            if (success) {
-                document.getElementById('addNetworkBtn').style.display = 'none';
-                showNotification('Now try connecting again!', 'info');
-            }
-        }
-        
-        async function payGameEntry() {
-            try {
-                if (!web3GameState.connected) {
-                    throw new Error('Wallet not connected');
-                }
-
-                if (!web3GameState.onCorrectNetwork) {
-                    throw new Error('Please switch to Irys Network first');
-                }
-
-                updatePayEntryButton('Checking Balance...', true);
-                await checkBalance();
-
-                updatePayEntryButton('Processing Payment...', true);
-                showNotification('Processing entry fee payment on Irys Network...', 'info');
-
-                console.log('Processing REAL entry fee for:', web3GameState.userAddress);
-                console.log('Network: Irys Network (Chain ID: 1270)');
-
-                const entryFeeInWei = ethers.parseEther("0.001"); 
-                
-                updatePayEntryButton('Estimating Gas...', true);
-                const gasEstimate = await web3GameState.provider.estimateGas({
-                    to: ENTRY_FEE_COLLECTOR,
-                    value: entryFeeInWei,
-                    from: web3GameState.userAddress
-                });
-
-                const txRequest = {
-                    to: ENTRY_FEE_COLLECTOR,
-                    value: entryFeeInWei,
-                    gasLimit: gasEstimate * 120n / 100n, 
-                    maxFeePerGas: ethers.parseUnits("20", "gwei"),
-                    maxPriorityFeePerGas: ethers.parseUnits("2", "gwei")
-                };
-
-                console.log('📝 Sending transaction request:', txRequest);
-                
-                updatePayEntryButton('Processing Payment...', true);
-                
-                const tx = await web3GameState.signer.sendTransaction(txRequest);
-                console.log('⏳ Transaction sent, waiting for confirmation:', tx.hash);
-                
-                showNotification(`Transaction sent! Hash: ${tx.hash.substring(0, 10)}...`, 'info');
-                updatePayEntryButton('Processing Payment...', true);
-
-                const receipt = await tx.wait();
-                console.log('✅ Transaction confirmed:', receipt);
-
-                if (receipt.status === 1) {
-                    web3GameState.entryPaid = true;
-                    updateWalletUI();
-                    updateStartButton();
-                    
-                    showNotification(`Entry fee paid! Tx: ${receipt.hash.substring(0, 10)}...`, 'success');
-                    updatePayEntryButton('Success', true);
-                    
-                    console.log('Entry fee payment successful on Irys Network');
-                    console.log('Transaction receipt:', receipt);
-                } else {
-                    throw new Error('Transaction failed');
-                }
-
-            } catch (error) {
-                console.error('❌ Payment failed:', error);
-                
-                let errorMessage = error.message;
-                
-                if (error.code === 4001) {
-                    errorMessage = 'Transaction rejected by user';
-                } else if (error.code === 'INSUFFICIENT_FUNDS') {
-                    errorMessage = 'Insufficient IRYS balance';
-                } else if (error.code === 'NETWORK_ERROR') {
-                    errorMessage = 'Network connection error';
-                } else if (error.message.includes('gas')) {
-                    errorMessage = 'Gas estimation failed - check network connection';
-                } else if (error.message.includes('insufficient funds')) {
-                    errorMessage = 'Insufficient IRYS balance for transaction + gas';
-                }
-                
-                showNotification(`Payment failed: ${errorMessage}`, 'error');
-                updatePayEntryButton('PLAY NOW', false);
-                
-                web3GameState.entryPaid = false;
-                updateWalletUI();
-                updateStartButton();
-            }
-        }
-        
-        // UI UTILITY FUNCTIONS
-        function updateWalletStatus(message, type) {
-            const statusEl = document.getElementById('walletStatus');
-            if (statusEl) {
-                statusEl.textContent = message;
-                statusEl.className = `wallet-status ${type}`;
-            }
-        }
-
-        function updateConnectButton(text, disabled) {
-            const button = document.getElementById('connectWallet');
-            if (button) {
-                button.textContent = text;
-                button.disabled = disabled;
-            }
-        }
-
-        function updatePayEntryButton(text, disabled) {
-            const button = document.getElementById('payEntry');
-            if (button) {
-                button.textContent = text;
-                button.disabled = disabled;
-            }
-        }
-
-        function updateWalletUI() {
-            const walletInfo = document.getElementById('walletInfo');
-            const connectButton = document.getElementById('connectWallet');
-            const userAddressEl = document.getElementById('userAddress');
-            const currentNetworkEl = document.getElementById('currentNetwork');
-            const userBalanceEl = document.getElementById('userBalance');
-            const payEntryButton = document.getElementById('payEntry');
-
-            if (web3GameState.connected) {
-                if (walletInfo) walletInfo.style.display = 'block';
-                if (connectButton) connectButton.style.display = 'none';
-                
-                if (userAddressEl) userAddressEl.textContent = formatAddress(web3GameState.userAddress);
-                if (currentNetworkEl) currentNetworkEl.textContent = 'Irys Network';
-                if (userBalanceEl) userBalanceEl.textContent = formatEther(web3GameState.balance);
-                
-                if (payEntryButton) {
-                    if (web3GameState.entryPaid) {
-                        payEntryButton.textContent = 'Success';
-                        payEntryButton.disabled = true;
-                    } else {
-                        payEntryButton.textContent = 'PLAY NOW';
-                        payEntryButton.disabled = false;
-                    }
-                }
-            } else {
-                if (walletInfo) walletInfo.style.display = 'none';
-                if (connectButton) {
-                    connectButton.style.display = 'inline-block';
-                    connectButton.textContent = '🦊 Connect MetaMask';
-                    connectButton.disabled = false;
-                }
-            }
-        }
-
-        function updateStartButton() {
-            const startBtn = document.getElementById('startBtn');
-            if (!startBtn) return;
-            
-            if (web3GameState.connected && web3GameState.entryPaid && web3GameState.onCorrectNetwork) {
-                startBtn.disabled = false;
-                startBtn.classList.remove('disabled');
-                startBtn.classList.add('enabled');
-                startBtn.textContent = 'START GAME';
-            } else {
-                startBtn.disabled = true;
-                startBtn.classList.add('disabled');
-                startBtn.classList.remove('enabled');
-                
-                if (!web3GameState.connected) {
-                    startBtn.textContent = 'Connect Wallet First';
-                } else if (!web3GameState.onCorrectNetwork) {
-                    startBtn.textContent = 'Switch to Irys Network';
-                } else {
-                    startBtn.textContent = 'Pay Entry Fee First';
-                }
-            }
-        }
-
-        function formatAddress(address) {
-            if (!address) return 'N/A';
-            return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-        }
-
-        function formatEther(wei) {
-            try {
-                return parseFloat(ethers.formatEther(wei)).toFixed(4);
-            } catch {
-                return '0.0000';
-            }
-        }
-
-        function showNotification(message, type) {
-            const notification = document.getElementById('web3-notification');
-            if (notification) {
-                notification.textContent = message;
-                notification.className = `web3-notification show ${type}`;
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 5000);
-            }
-        }
-
-        // INITIALIZATION WITH LOADING SCREEN
+        // INITIALIZATION
         document.addEventListener('DOMContentLoaded', () => {
-            const connectButton = document.getElementById('connectWallet');
-            const payEntryButton = document.getElementById('payEntry');
-            const addNetworkButton = document.getElementById('addNetworkBtn');
-
-            if (connectButton) {
-                connectButton.addEventListener('click', connectWallet);
-            }
-
-            if (payEntryButton) {
-                payEntryButton.addEventListener('click', payGameEntry);
-            }
-
-            if (addNetworkButton) {
-                addNetworkButton.addEventListener('click', addNetworkManually);
-            }
-
-            // Global Web3 Game Interface
-            window.web3Game = {
-                isWeb3Ready: () => web3GameState.connected && web3GameState.entryPaid && web3GameState.onCorrectNetwork,
-                getPlayerAddress: () => web3GameState.userAddress,
-                isEntryPaid: () => web3GameState.entryPaid,
-                isOnCorrectNetwork: () => web3GameState.onCorrectNetwork
-            };
-
             // Initialize loading sequence
             updateLoadingText('Loading...');
             
             // Hide loading screen after assets are ready
             setTimeout(() => {
                 hideLoadingScreen();
-                console.log('✅ Game ready - Web3 integration initialized');
+                console.log('✅ Game ready');
             }, 2000);
 
-            console.log('✅ Web3 integration initialized');
+            console.log('✅ Game initialized');
         });
     </script>
 </body>
